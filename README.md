@@ -102,7 +102,9 @@ Operating system settings:
 
  - increasing ulimits hard and soft for nginx to 65536
  - increase sysctl fs.file-max to 324567
+
 nginx settings:
+
  - sendfile on;
  - tcp_nopush on;
  - types_hash_max_size 2048;
