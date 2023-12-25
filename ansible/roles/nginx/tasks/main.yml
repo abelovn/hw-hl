@@ -1,0 +1,61 @@
+---
+  - name: Add nginx repo
+    # become: true
+    yum_repository:
+      name: nginx-stable
+      description: nginx repo
+      file: nginx-stable
+      baseurl: http://nginx.org/packages/centos/$releasever/$basearch/
+      gpgkey: https://nginx.org/keys/nginx_signing.key
+      gpgcheck: yes
+      enabled: yes
+
+  - name: add line to nginx repo
+    # become: true
+    lineinfile:
+      path: /etc/yum.repos.d/nginx-stable.repo
+      line: module_hotfixes=true
+      state: present
+
+  - name: install nginx
+    # become: true
+    yum:
+      name: nginx
+      state: present
+    notify:
+      - nginx systemd
+
+  - name: copy nginx config
+    copy:
+      src: ../files/nginx.conf
+      dest: /etc/nginx/nginx.conf
+
+  - name: copy site config
+    copy:
+      src: ../files/test.conf
+      dest: /etc/nginx/conf.d/test.conf
+
+  - name: delete default site config
+    file:
+      path: /etc/nginx/conf.d/default.conf
+      state: absent
+
+  - name: set ulimits hard
+    pam_limits:
+      domain: nginx
+      limit_type: hard
+      limit_item: nofile
+      value: 65536
+
+  - name: set ulimits soft
+    pam_limits:
+      domain: nginx
+      limit_type: soft
+      limit_item: nofile
+      value: 65536
+
+  - name: set sysctl fopen
+    sysctl:
+      name: fs.file-max
+      value: 324567
+      sysctl_set: true
